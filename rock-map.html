@@ -1,0 +1,99 @@
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+
+<dom-module id="rock-map">
+  <template>
+    <link rel="stylesheet" href="../bower_components/leaflet/dist/leaflet.css">
+    <style>
+      :host {
+        display: block;
+      }
+      #map {
+        height: 300px;
+      }
+    </style>
+    <div id="map"></div>
+  </template>
+
+  <script src="bower_components/leaflet/dist/leaflet.js"/></script>
+  <script>
+    /**
+     * `map-element`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class RockMap extends Polymer.Element {
+      static get is() { return 'rock-map'; }
+      connectedCallback() {
+        super.connectedCallback()
+        console.log('MapElement created!');
+        this.startMap()
+        this.placeMarkers()
+      }
+
+      startMap () {
+        console.log(this.token);
+        this.map = L.map(this.$.map).setView(this.center.latlng, this.center.zoom)
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          maxZoom: 18,
+          id: 'mapbox.streets',
+          accessToken: this.token
+        }).addTo(this.map);
+
+        console.log('Map started')
+      }
+
+      get defaultIcon () {
+        const _defaultOpt = {
+          iconUrl: '../bower_components/leaflet/dist/images/marker-icon.png',
+          iconSize: [38, 45],
+          iconAnchor: [22, 94],
+          popupAnchor: [-3, -76],
+          shadowUrl: '../bower_components/leaflet/dist/images/marker-shadow.png',
+          shadowSize: [68, 45],
+          shadowAnchor: [22, 94]
+        }
+        var icon = Object.assign(_defaultOpt, this.markerIcon)
+        return L.icon(icon)
+      }
+
+      placeMarkers () {
+        console.log(this.defaultIcon)
+        console.log(this.markers)
+        this.markers.forEach(m => {
+          var _marker = L.marker(m.latlng, { icon: this.defaultIcon }).addTo(this.map)
+          _marker.bindPopup(m.popup)
+        })
+      }
+
+      static get properties() {
+        return {
+          center: {
+            type: Object,
+            value: {
+              latlng: [51.505, -0.09],
+              zoom: 13
+            }
+          },
+          markers: {
+            type: Array,
+            value: []
+          },
+          markerIcon: {
+            type: Object,
+            value: {}
+          },
+          token: {
+            type: String,
+            value: ''
+          }
+        };
+      }
+    }
+
+    window.customElements.define(RockMap.is, RockMap);
+  </script>
+</dom-module>
